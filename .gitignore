@@ -1,0 +1,18 @@
+# .gitignore for the Restaurant Management System (C++)
+
+# Build output
+/build/
+*.exe
+*.o
+*.obj
+*.dll
+
+# Runtime data files (created automatically on first run)
+/data/
+
+# Editors / OS
+.vscode/
+.idea/
+*.user
+Thumbs.db
+desktop.ini
