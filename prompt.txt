@@ -1,0 +1,73 @@
+You are a senior C++ mentor and developer. I want to build a Restaurant Management System from scratch as a C++ OOP course project for my university. Work in two phases: PLAN first, then BUILD. Do not write any code or create any file during the planning phase.
+
+PROJECT CONTEXT
+
+This is a console (terminal) Restaurant Management System. The main focus is the restaurant staff and their payroll: who works in the restaurant, what each person does, and how each person is paid. Around that, there is a simple menu, orders and billing.
+
+Staff roles and what they do:
+- Manager: runs the restaurant. Hires, fires, promotes and updates staff, approves leave, runs payroll, manages the menu, sees reports. Pay = base salary + fixed allowance.
+- Chef: cooks orders, sees the cooking queue, marks orders as Cooking or Ready. Pay = base salary + a rate per dish cooked.
+- Waiter: takes orders at tables, serves food, receives tips. Pay = base salary + tips.
+- Cashier: creates bills, takes payment, closes orders. Pay = base salary + overtime pay.
+- Cleaner: cleans tables and kitchen, has a cleaning schedule. Pay = based on days present.
+- Head Chef: a person who is both a Chef and a Manager (cooks and also manages the kitchen). This is the diamond problem case. Pay combines both parts.
+
+Payroll: each staff member has attendance data (days present, overtime hours). A payroll run calculates gross pay from the role's pay rule, subtracts a simple PF percentage and a simple tax slab, and produces a payslip. Payslips are shown on screen and kept in a history.
+
+Menu and orders: the menu has dishes with name, price and stock. A waiter places an order for a table, stock reduces when an order is placed (out of stock gives an error), the order moves through the states Placed, Cooking, Ready, Served and Paid. The cashier makes a bill with GST, optional discount and tip. The tip goes to the waiter's pay data.
+
+Access control: a user logs in with their staff ID, and the role decides which menu they see. Manager can do everything. Cashier does billing. Waiter takes orders and sees own tips. Chef sees and updates the cooking queue. Cleaner sees own schedule.
+
+Data storage: staff and menu data must be saved in files and loaded again when the program starts, so the user can add, view, update and delete records from the terminal and the data survives restarts. On the first run, create one default manager so someone can log in.
+
+LEVEL
+
+The goal is an "entry-level intermediate" project: a strong 3rd-semester B.Tech student project that I can fully explain in a viva. Keep only the important parts. Anything complicated that does not help the syllabus must be dropped. Do not build things like custom Money, Date or Time classes, pay-strategy class systems, many interface classes, table or inventory subsystems, or nested namespaces.
+
+LANGUAGE AND SYLLABUS
+
+- Pure C++ only (C++11). No other language.
+- Use only topics from my syllabus: classes and objects, constructors and destructors, copy constructor, `this` pointer, static members, friend function/class, function overloading, operator overloading, inheritance (single, multilevel, multiple), virtual base class and the diamond problem, virtual and pure virtual functions, run-time polymorphism, file handling, random access, function and class templates, exception handling, namespaces.
+- `std::vector` and `std::string` are allowed. Do not use smart pointers, lambdas, `std::map`, threads or other advanced features.
+- Code must be simple, with short comments, so a beginner can explain every line.
+
+MANDATORY FEATURES (must clearly appear in the code)
+
+- Multiple inheritance with virtual inheritance: one real diamond problem (the Head Chef).
+- An abstract base class for staff with pure virtual functions (for example pay calculation and duties), used through base-class pointers for run-time polymorphism.
+- Class templates and function templates: a generic container class for objects, a generic file storage class, and simple helper templates such as sort and sum.
+- Binary file handling with random access at beginner level: store, retrieve, load all, update and delete records, using fixed-size records and seek operations (no std::string inside binary records; deleting can be done with an "active" flag).
+- Exception handling with one simple custom exception class, used so the program never crashes on bad input.
+- One namespace for the project.
+- Operator overloading, friend usage and static members, each used in a small and natural way (for example printing with `<<`, adding an item to an order with `+=`, an auto-increasing staff ID, and a payroll class that is a friend of staff).
+
+CODE ORGANIZATION RULES
+
+- The project must NOT be a single file. Split it into several files that use each other through headers.
+- Every .cpp file must stay under 500 lines.
+- Do not keep any file, class or feature that is not needed.
+
+ENVIRONMENT AND RUNNING
+
+- The project needs no Python and no third-party libraries. Do not create a .venv unless something truly requires it. If you decide it is not needed, tell me why in one line.
+- Provide one single entry point: one command that compiles all the files and starts the program, and the command to run it again later.
+- Give me the steps to test every function of the program in the terminal.
+
+TESTING
+
+- Compile with warnings turned on and fix all errors and warnings.
+- Test every feature through the terminal with a scripted session: login, add, view, update and delete staff, restart and check that data loads back, menu management, placing an order, billing, payroll. Show me the results.
+
+DOCUMENTATION
+
+- At the end, create one Markdown file that explains every code file: what it contains, what each class does and its main functions, in brief and in simple English.
+- Add a short table mapping each syllabus topic to the file and class where it is used.
+- Add a short "how to build and run" section.
+
+PHASE 1 INSTRUCTIONS (do this now)
+
+1. Plan the project: decide the file layout yourself, list every class with its responsibility, and show how the mandatory features will be covered.
+2. Check the plan against the level rule above and remove anything too advanced.
+3. End with a short list of decisions that need my approval, then stop and wait for my reply. Do not write code or create files until I approve.
+
+PHASE 2 (only after I approve): build the whole project, compile it, test it, and write the documentation as described above.
