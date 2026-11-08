@@ -68,8 +68,11 @@ g++ -I include main.cpp menus.cpp restaurant.cpp staff.cpp menu.cpp order.cpp pa
 ./rms.exe
 ```
 
-### Default Login
-On the first run with an empty `data/` folder, a default Manager account is created automatically:
-- **Staff ID**: `1`
+### Default / Seeded Accounts
+The data files in `data/` come pre-loaded with staff and an Italian menu:
+- **Manager (ID: 1)**: `Carlo Ancelotti` (Full access: staff CRUD, menu CRUD, payroll)
+- **HeadChef (ID: 2)**: `Andrea Pirlo` (Manager + kitchen permissions)
+- **Chef (ID: 3 & 4)**: `Gianluigi Buffon`, `Mario Balotelli` (View menu)
+- **Waiter (ID: 5 & 6)**: `Harry Kane`, `David Beckham` (Place orders, serve, make bills)
 
-Log in using ID `1` to add staff members and menu items.
+*(Note: If `data/` files are deleted, the system automatically creates a Default Manager at ID 1 on startup).*

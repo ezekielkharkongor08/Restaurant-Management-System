@@ -31,16 +31,18 @@ data/payslips.dat
 The `.dat` files are created automatically on first use. If `data/` is
 missing, the program reports that it cannot open the data file.
 
-## First login
+## Pre-loaded Accounts (Italian Restaurant Setup)
 
-On a fresh `data/` folder, one default Manager is created:
+The data folder comes pre-loaded with staff and dishes:
 
-```
-Name: Default Manager
-Staff ID: 1
-```
+- **ID 1 (Manager)**: Carlo Ancelotti
+- **ID 2 (HeadChef)**: Andrea Pirlo
+- **ID 3 (Chef)**: Gianluigi Buffon
+- **ID 4 (Chef)**: Mario Balotelli
+- **ID 5 (Waiter)**: Harry Kane
+- **ID 6 (Waiter)**: David Beckham
 
-Log in as ID `1`, then add a Chef, Waiter and HeadChef and some dishes.
+*(On a fresh/empty `data/` folder, ID 1 is created as "Default Manager").*
 
 ## Quick test
 
