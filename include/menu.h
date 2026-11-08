@@ -1,53 +1,41 @@
-#ifndef RMS_MENU_H
-#define RMS_MENU_H
+#ifndef MENU_H
+#define MENU_H
 
-#include <string>
 #include <ostream>
-#include "records.h"
-
-namespace restaurant {
+#include <string>
 
 class Dish {
 private:
     int id;
-    std::string name;
+    char name[32];
     double price;
     int stock;
-    bool active;
-    static int nextDishId;                     // static member: auto-increasing dish id
+    int active;
+
+    static int nextId;
+
 public:
     Dish();
-    Dish(const std::string &n, double p, int s);
-    Dish(const Dish &other);                   // copy constructor
-    Dish& operator=(const Dish &other);        // assignment operator
-    ~Dish();
+    Dish(const std::string &dishName, double dishPrice, int dishStock = 0);
 
-    static int nextDishIdValue() { return nextDishId; }
-    static void setNextDishIdValue(int v) { nextDishId = v; }
+    static int nextIdValue();
+    static void setNextIdValue(int value);
 
     int getId() const;
-    const std::string& getName() const;
+    std::string getName() const;
     double getPrice() const;
     int getStock() const;
     bool isActive() const;
 
-    void setName(const std::string &n);
-    void setPrice(double p);
-    void setStock(int s);
-    void setActive(bool a);
+    void setPrice(double dishPrice);
+    void setStock(int dishStock);
+    void setActive(bool status);
 
-    // Reduce stock when an order is placed; out of stock -> error handled by caller
-    bool reduceStock(int qty);
+    bool reduceStock(int quantity);
 
-    // Operator overloading: compare by price (used by sortItems template)
     bool operator<(const Dish &other) const;
 
-    DishRecord toRecord() const;
-    void fromRecord(const DishRecord &r);
-
-    friend std::ostream& operator<<(std::ostream &os, const Dish &d);  // friend usage
+    friend std::ostream& operator<<(std::ostream &output, const Dish &dish);
 };
-
-}
 
 #endif

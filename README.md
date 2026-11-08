@@ -1,89 +1,75 @@
-# Restaurant Management System (C++ OOP Course Project)
+# Restaurant Management System (C++)
 
-A console (terminal) Restaurant Management System built in pure C++11. The main focus is **restaurant staff and payroll** — who works in the restaurant, what each person does, and how each person is paid. Around that is a simple menu, ordering, and billing system.
+A console-based Restaurant Management System written in C++ (C++11). This project simulates the core operations of a restaurant, including staff management, role-based access, menu and inventory tracking, order processing, billing, and monthly payroll calculation with persistent binary storage.
 
-## Project Purpose
-Entry-level intermediate 3rd-semester B.Tech OOP project. Every line is written so a beginner can explain it in a viva. Built with only syllabus-allowed topics — no smart pointers, lambdas, `std::map`, threads, or external libraries.
+## Features
+
+- **Role-Based Login**: Access is granted based on staff role (Manager, HeadChef, Chef, Waiter).
+- **Staff Management**: Add, view, update, and remove staff members.
+- **Menu & Stock Tracking**: Manage dishes, update prices, and automatically reduce stock when orders are placed.
+- **Order Processing & Billing**: Waiters can place table orders, track their status (Placed -> Served -> Paid), apply discounts, and generate final bills.
+- **Payroll System**: Computes gross salary, 12% provident fund (PF) deduction, and net pay for all active staff, maintaining a history of generated payslips.
+- **Binary Data Persistence**: Uses binary files with random access (`seekp`/`seekg`) so that staff, menu items, orders, and payslips persist across restarts.
+
+## Object-Oriented Programming (OOP) Concepts Used
+
+- **Encapsulation & Abstraction**: Class design hiding data representation behind public interfaces.
+- **Inheritance**:
+  - Hierarchical inheritance: `Staff` base class extended by `Chef`, `Waiter`, and `Manager`.
+  - Multiple and virtual inheritance: `HeadChef` inherits from both `Chef` and `Manager` virtually, resolving the Diamond Problem.
+- **Runtime Polymorphism**: Abstract base class (`Staff`) with pure virtual functions (`calculateSalary()`, `display()`) called through base-class pointers (`Staff*`).
+- **Templates**:
+  - Class templates: `Repo<T>` (dynamic array container implementing the Rule of Three) and `FileStore<T>` (generic binary file handler).
+  - Function template: `sortItems<T>` to sort items using overloaded comparison operators.
+- **Operator Overloading**:
+  - `+=` to add dish items into an order.
+  - `[]` and `=` in `Repo<T>`.
+  - `<<` stream insertion operator for formatted output of dishes, orders, bills, and payslips.
+- **Exception Handling**: Custom exception class (`RestaurantException`) and standard exception handling for input validation and business logic constraints.
+
+## Project Structure
+
+```
+├── include/
+│   ├── exceptions.h      # Custom exception class
+│   ├── templates.h       # Generic Repo<T> and FileStore<T> templates
+│   ├── staff.h           # Staff class hierarchy (Manager, Chef, Waiter, HeadChef)
+│   ├── menu.h            # Dish class
+│   ├── order.h           # Order and Bill classes
+│   ├── payroll.h         # Payslip and Payroll classes
+│   ├── restaurant.h      # Central controller class
+│   └── menus.h           # Console menus and input helper functions
+├── main.cpp              # Application entry point and role router
+├── menus.cpp             # Sub-menu displays and input validation
+├── restaurant.cpp        # Core restaurant logic and file operations
+├── staff.cpp             # Staff hierarchy implementation
+├── menu.cpp              # Dish implementation
+├── order.cpp             # Order and billing implementation
+├── payroll.cpp           # Payroll calculations and payslip history
+├── data/                 # Directory where binary data files (.dat) are saved
+├── instruction.md        # Quick compile and run steps
+└── README.md             # Project documentation
+```
 
 ## How to Build and Run
-See `instruction.md` for the single compile-and-run command and step-by-step testing instructions.
 
-## File Layout
+### Requirements
+- GCC / G++ supporting C++11 or later.
 
-| File | Contains |
-|------|----------|
-| `main.cpp` | Entry point. Creates `Restaurant`, runs the app, wraps everything in `try/catch` so bad input never crashes the program. |
-| `staff.h` / `staff.cpp` | Abstract `Staff` base class + concrete roles: `Chef`, `Waiter`, `Cashier`, `Cleaner`. Pure virtual pay/duties/print/role. Copy constructor, `this` pointer, `operator=`, virtual destructor, `friend class Payroll`, conversion to/from binary record. |
-| `manager.h` / `manager.cpp` | `Manager` and `HeadChef`. `Manager` = base + fixed allowance. `HeadChef` = **diamond problem** (multiple + virtual inheritance: both Chef and Manager, sharing one `Staff`). |
-| `menu.h` / `menu.cpp` | `Dish` class (name, price, stock). `operator<<` (friend), `operator<` (for sorting), `reduceStock()`, static auto-increasing dish ID, copy constructor/assignment, binary record conversion. |
-| `order.h` / `order.cpp` | `OrderItem` and `Order`. Order states Placed → Cooking → Ready → Served → Paid. `operator+=` to add an item. Static auto-increasing order ID. |
-| `billing.h` / `billing.cpp` | `Bill` — subtotal, discount %, GST (5%), tip, total. `operator<<` prints the receipt. Tip is added to the waiter's pay data. |
-| `payroll.h` / `payroll.cpp` | `Payslip` and `Payroll`. Payroll is a **friend of Staff**. PF (12%), tax slabs, gross → net calculation, payslip history. Run-time polymorphism via `Staff*` pointers. |
-| `restaurant.h` / `restaurant.cpp` | `Restaurant` — the system. Holds staff roster (`vector<Staff*>`), menu (`Repo<Dish>`), orders, payslip history (`Repo<Payslip>`), and two `FileStore`s for binary files. Login, staff CRUD, menu CRUD, order flow, billing, payroll, reports, load/save, first-run default manager seed. |
-| `operations.cpp` | Terminal menus and input/output flow for each role (Manager, Chef, Waiter, Cashier, Cleaner). Calls public `Restaurant` methods. |
-| `templates.h` | Class templates `Repo<T>` (generic container with deep copy) and `FileStore<T>` (generic binary file storage with random access via `seekg`/`seekp`). Function templates `sortItems<T>` and `arraySum<T>`. |
-| `records.h` | Fixed-size binary records `StaffRecord` and `DishRecord` (no `std::string` inside — uses `char[32]`, so `sizeof` is constant, enabling random access). |
-| `exceptions.h` | `RestaurantException` — the one custom exception class. |
-| `utils.h` / `utils.cpp` | Input helpers `readInt`, `readDouble`, `trim`, `copyToCharArray`. |
-| `instruction.md` | Build and run instructions. |
+### Compilation
+From the project root folder:
 
-## Class Responsibilities
+```bash
+g++ -I include main.cpp menus.cpp restaurant.cpp staff.cpp menu.cpp order.cpp payroll.cpp -std=c++11 -Wall -Wextra -o rms.exe
+```
 
-- **Staff** (abstract): base for all staff. Fields `id`, `name`, `baseSalary`, `daysPresent`, `overtimeHours`. Pure virtuals `calculatePay()`, `duties()`, `print()`, `role()`. Static auto-increasing `nextId`. Virtual destructor. `friend class Payroll`.
-- **Chef**: pay = base + (rate per dish × dishes cooked). Cooks orders, updates cooking queue.
-- **Waiter**: pay = base + tips. Takes orders, serves food, receives tips.
-- **Cashier**: pay = base + (overtime hours × overtime rate). Creates bills, takes payment.
-- **Cleaner**: pay = base × days present / 26. Cleans tables/kitchen.
-- **Manager**: pay = base + fixed allowance. Hires/fires/promotes staff, payroll, menu, reports.
-- **HeadChef**: diamond class — both Chef and Manager. Pay = base + allowance + per-dish rate (base counted once via virtual base). This is the real multiple-inheritance + virtual-base-class case.
-- **Dish**: menu item with name/price/stock.
-- **Order**: table-based order moving through states Placed/Cooking/Ready/Served/Paid.
-- **Bill**: receipt with GST, discount, tip.
-- **Payslip**: gross, PF, tax, net for one staff member.
-- **Payroll**: computes and prints payslips for all staff using base-class pointers (run-time polymorphism).
-- **Repo<T>**: generic container (class template) used for menu and payslip history.
-- **FileStore<T>**: generic binary file storage (class template) with append/readAt/updateAt/count/readAll using `seek` operations.
-- **RestaurantException**: custom exception thrown on bad input / business errors.
+### Execution
+```bash
+./rms.exe
+```
 
-## Mandatory Syllabus Features Covered
+### Default Login
+On the first run with an empty `data/` folder, a default Manager account is created automatically:
+- **Staff ID**: `1`
 
-| Feature | Where |
-|---------|-------|
-| Classes & objects, constructors/destructors | Every class |
-| Copy constructor + `this` pointer | `Staff`, `Dish`, `Repo<T>` assignment |
-| Static members (auto-increasing ID) | `Staff::nextId`, `Dish::nextDishId`, `Order::nextOrderId`, `Payroll::PF_RATE`, `Manager::ALLOWANCE` |
-| Friend function/class | `operator<<` friends, `Payroll` is friend of `Staff` |
-| Function overloading | Constructors (default + parameterized), `readInt`/`readDouble` |
-| Operator overloading | `<<` (printing), `+=` (add item to order), `<` (dish sort), `[]` and `=` (Repo) |
-| Inheritance: single, multilevel, multiple | Staff → roles (single/multilevel); HeadChef : Chef, Manager (multiple) |
-| Virtual base class + diamond problem | `Chef`/`Manager` : `virtual public Staff`; `HeadChef` shares one `Staff` |
-| Virtual & pure virtual functions | `Staff` pure virtuals; `calculatePay()` overridden per role |
-| Run-time polymorphism | `vector<Staff*>` roster; payroll calls virtual `calculatePay()` via base pointers |
-| File handling + random access | `FileStore<T>` with `seekg`/`seekp`, fixed-size binary records |
-| Class templates | `Repo<T>`, `FileStore<T>` |
-| Function templates | `sortItems<T>`, `arraySum<T>` |
-| Exception handling | `RestaurantException` — program never crashes on bad input |
-| Namespace | `namespace restaurant` (one flat namespace) |
-
-## Data Storage
-- Staff → `staff.dat`, Menu → `menu.dat`
-- Fixed-size records (binary), no `std::string` inside records
-- Random access via `seekg`/`seekp` — record N at byte `N × sizeof(Record)`
-- Delete = soft delete (`active` flag); update = `updateAt` in place
-- First run creates one default Manager so someone can log in
-- Data survives program restarts
-
-## Access Control (role → menu after login by Staff ID)
-- **Manager / Head Chef**: staff, menu, order, billing, payroll, reports
-- **Chef / Head Chef**: cooking queue, mark cooking/ready
-- **Waiter**: place order, view queue, my profile
-- **Cashier**: billing, my profile
-- **Cleaner**: my profile
-
-## Pay Rules
-- Manager: base + allowance
-- Chef: base + rate per dish
-- Waiter: base + tips
-- Cashier: base + overtime pay
-- Cleaner: base × days present / 26
-- Head Chef: base + allowance + per-dish rate
+Log in using ID `1` to add staff members and menu items.

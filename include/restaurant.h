@@ -1,42 +1,41 @@
-#ifndef RMS_RESTAURANT_H
-#define RMS_RESTAURANT_H
+#ifndef RESTAURANT_H
+#define RESTAURANT_H
 
 #include <string>
 #include <vector>
-#include "staff.h"
-#include "manager.h"
+#include "exceptions.h"
 #include "menu.h"
 #include "order.h"
 #include "payroll.h"
-#include "billing.h"
+#include "staff.h"
 #include "templates.h"
-#include "exceptions.h"
-#include "utils.h"
-
-namespace restaurant {
 
 class Restaurant {
 private:
-    std::vector<Staff*> staffList;             // run-time polymorphism through base-class pointers
-    Repo<Dish> menuRepo;                       // class template container
+    std::vector<Staff*> staffList;
+    Repo<Dish> menu; // dynamic array template used for catalog management
     std::vector<Order> orders;
-    Repo<Payslip> payslipHistory;              // class template container
-    FileStore<StaffRecord> staffStore;         // class template binary storage (random access)
-    FileStore<DishRecord> menuStore;           // class template binary storage (random access)
+
+    FileStore<StaffData> staffStore;
+    FileStore<Dish> menuStore;
+    FileStore<Order> orderStore;
+
+    Payroll payroll;
+
     int loggedInId;
     int loggedInRole;
 
-    Staff* findStaffById(int id) const;
     int findStaffIndexById(int id) const;
-    Dish* findDishById(int id);
     int findDishIndexById(int id) const;
     Order* findOrderById(int id);
 
-    void saveAllStaff();
-    void saveAllMenu();
+    void saveStaff(const Staff &staffMember);
+    void saveDish(const Dish &dish);
+    void saveOrder(const Order &order);
+
     void loadAllStaff();
     void loadAllMenu();
-    void seedDefaultManager();                 // first run: create one default manager
+    void loadAllOrders();
 
 public:
     Restaurant();
@@ -48,39 +47,28 @@ public:
     int getLoggedInRole() const;
     bool isLoggedIn() const;
 
-    // Staff operations
-    void addStaff(int role, const std::string &name, double base);
+    // Staff management
+    void addStaff(int role, const std::string &name, double salary);
     void viewStaff() const;
-    void updateStaff(int id);
+    void updateStaff(int id, const std::string &name, double salary);
     void deleteStaff(int id);
-    void promoteStaff(int id, int newRole);
-    void markAttendance(int id, int days, double ot);
-    void viewMyProfile() const;
 
-    // Menu operations
+    // Menu management
+    void addDish(const std::string &name, double price);
     void addDish(const std::string &name, double price, int stock);
     void viewMenu() const;
-    void updateDish(int id);
+    void updateDish(int id, double price, int stock);
     void deleteDish(int id);
 
-    // Order operations
+    // Orders and billing
     void placeOrder(int tableNo);
-    void viewCookingQueue() const;
-    void markCooking(int orderId);
-    void markReady(int orderId);
+    void viewOrders() const;
     void markServed(int orderId);
-
-    // Billing
-    void makeBill(int orderId, double discountPercent, double tip);
+    void makeBill(int orderId);
 
     // Payroll
     void runPayroll();
     void viewPayslipHistory() const;
-
-    // Reports
-    void showReports() const;
 };
-
-}
 
 #endif

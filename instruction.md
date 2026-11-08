@@ -1,96 +1,59 @@
-# Build and Run Instructions
+# Build and Run
 
-## Prerequisites
-- MinGW `g++` (C++11) installed. No Python, no `.venv`, no third-party libraries are needed — this is plain C++.
+## Requirements
 
-## Build (single command)
-Open a terminal in the project folder (`C:\Users\Ezekiel\Desktop\OOPs project`) and run:
+- `g++` with C++11 support
+- Run the commands from the project root (the folder containing `main.cpp`)
+
+## Build
 
 ```bash
-g++ -I include main.cpp staff.cpp manager.cpp menu.cpp order.cpp billing.cpp payroll.cpp restaurant.cpp operations.cpp utils.cpp -std=c++11 -Wall -Wextra -o rms.exe
+g++ -I include main.cpp menus.cpp restaurant.cpp staff.cpp menu.cpp order.cpp payroll.cpp -std=c++11 -Wall -Wextra -o rms.exe
 ```
 
-This compiles all source files with warnings enabled and produces `rms.exe`. All warnings must be fixed (the project compiles warning-free).
+The build should finish with no warnings.
 
 ## Run
+
 ```bash
-.\rms.exe
+./rms.exe
 ```
 
-## First Run
-On the very first run, `staff.dat` does not exist, so the program automatically creates **one default Manager**:
-- Staff ID: `1`
-- Name: Default Manager
-- Base salary: `50000`
+Keep the `data/` folder next to `rms.exe`. The program reads and writes:
 
-Use Staff ID `1` to log in the first time.
+```
+data/staff.dat
+data/menu.dat
+data/orders.dat
+data/payslips.dat
+```
 
-## How to Test Every Feature (scripted terminal session)
+The `.dat` files are created automatically on first use. If `data/` is
+missing, the program reports that it cannot open the data file.
 
-### 1. Login
-- Run the program, choose `1. Login`, enter Staff ID `1` (default manager).
-- Wrong ID → shows "Login failed: invalid Staff ID" (exception handling, no crash).
+## First login
 
-### 2. Staff CRUD (Manager / Head Chef)
-- `1. Staff` → `1. Add Staff` → choose role (1=Manager, 2=Chef, 3=Waiter, 4=Cashier, 5=Cleaner, 6=HeadChef), enter name and base salary.
-- `2. View Staff` → see all staff with gross pay and duties.
-- `3. Update Staff` → change name and base salary.
-- `4. Delete Staff` → soft-delete (marked inactive, data kept in file).
-- `5. Promote/Change Role` → change a staff member's role.
-- `6. Mark Attendance` → set days present and overtime hours.
-- Logout → data is saved to `staff.dat`.
+On a fresh `data/` folder, one default Manager is created:
 
-### 3. Restart & Persistence Check
-- Run `.\rms.exe` again.
-- Login as ID `1`. Choose `2. View Staff` → all previously added staff are still there (loaded from `staff.dat`). Data survives restart.
+```
+Name: Default Manager
+Staff ID: 1
+```
 
-### 4. Menu Management (Manager / Head Chef)
-- `2. Menu` → `1. Add Dish` → enter dish name, price, stock.
-- `2. View Menu` → dishes shown sorted by price (uses function template `sortItems`).
-- `3. Update Dish` → change price/stock.
-- `4. Delete Dish` → soft-delete dish.
-- Saved to `menu.dat`.
+Log in as ID `1`, then add a Chef, Waiter and HeadChef and some dishes.
 
-### 5. Placing an Order (Waiter)
-- Login as a Waiter.
-- `1. Order` → `1. Place Order` → enter table number, add dish IDs and quantities, enter `0` to finish.
-- If quantity exceeds stock → error "Not enough stock!" (exception handling).
-- Stock reduces when the order is placed.
+## Quick test
 
-### 6. Cooking Queue (Chef / Head Chef)
-- Login as a Chef.
-- `1. Order` → `2. View Cooking Queue` → see Placed/Cooking/Ready orders.
-- `3. Mark Cooking` → order moves Placed → Cooking.
-- `4. Mark Ready` → order moves Cooking → Ready; chef's `dishesCooked` increases.
+1. Login as `1`.
+2. Manage Staff -> add a Chef (role 2) and a Waiter (role 3).
+3. Manage Menu -> add a dish with stock.
+4. Logout, login as the Waiter's ID.
+5. Place an order, view orders, mark it served, then make a bill
+   (discount 10, payment larger than the total).
+6. Logout, login as the Manager, run payroll and view payslip history.
+7. Exit and restart; staff, menu, orders and payslips should still be there.
 
-### 7. Serving (Waiter)
-- Login as the waiter who owns the order.
-- `1. Order` → `5. Mark Served` → order moves Ready → Served.
+## Clean data
 
-### 8. Billing (Cashier)
-- Login as a Cashier.
-- `1. Billing` → `1. Make Bill` → enter Order ID, discount % (0–100), tip amount.
-- Bill shows: subtotal, discount, GST (5%), tip, total.
-- Enter payment amount. If payment < total → error (exception handling).
-- Tip is added to the waiter's pay data (saved to `staff.dat`).
-- Order moves Served → Paid.
-
-### 9. Payroll (Manager / Head Chef)
-- `5. Payroll` → `1. Run Payroll` → computes gross pay per role, subtracts PF (12%) and tax slab, prints each payslip, shows total gross/net.
-- `2. View Payslip History` → see all generated payslips.
-
-### 10. Reports (Manager / Head Chef)
-- `6. Reports` → total staff count, estimated total payroll, total revenue from paid orders.
-
-### 11. Bad-Input Tests (exception handling)
-- Enter letters when a number is expected → "Invalid input" message, program does not crash.
-- Discount > 100 → error.
-- Payment < total → error.
-- Unknown Staff ID / Dish ID / Order ID → "not found" error.
-
-## Files Created at Runtime
-- `staff.dat` — staff records (binary, fixed-size)
-- `menu.dat` — menu records (binary, fixed-size)
-- `rms.exe` — compiled program
-
-Delete `staff.dat` and `menu.dat` to reset to a fresh first-run state (default manager recreated).
+To start from scratch, delete the `.dat` files inside `data/` (not the folder
+itself). The next run will create a new default Manager.

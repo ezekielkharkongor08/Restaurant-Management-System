@@ -1,86 +1,113 @@
 #include "payroll.h"
-#include <iostream>
-#include <iomanip>
 
-namespace restaurant {
+#include <cstring>
+#include <iostream>
+
+using namespace std;
 
 const double Payroll::PF_RATE = 0.12;
-const double Payroll::TAX_SLAB_1 = 25000.0;
-const double Payroll::TAX_SLAB_2 = 50000.0;
-const double Payroll::TAX_RATE_LOW = 0.05;
-const double Payroll::TAX_RATE_HIGH = 0.10;
 
-Payslip::Payslip() : staffId(0), staffName(""), gross(0.0), pf(0.0), tax(0.0), net(0.0) {}
-Payslip::Payslip(int id, const std::string &name, double g, double p, double t, double n)
-    : staffId(id), staffName(name), gross(g), pf(p), tax(t), net(n) {}
-
-int Payslip::getStaffId() const { return staffId; }
-const std::string& Payslip::getStaffName() const { return staffName; }
-double Payslip::getGross() const { return gross; }
-double Payslip::getPF() const { return pf; }
-double Payslip::getTax() const { return tax; }
-double Payslip::getNet() const { return net; }
-
-std::ostream& operator<<(std::ostream &os, const Payslip &p) {
-    os << "\n===== PAYSLIP =====\n";
-    os << "Staff ID: " << p.staffId << " | Name: " << p.staffName << "\n";
-    os << "Gross Pay:  Rs." << p.gross << "\n";
-    os << "PF (12%):   -Rs." << p.pf << "\n";
-    os << "Tax:        -Rs." << p.tax << "\n";
-    os << "-------------------\n";
-    os << "NET PAY:    Rs." << p.net << "\n";
-    os << "===================\n";
-    return os;
+Payslip::Payslip() {
+    staffId = 0;
+    memset(staffName, 0, sizeof(staffName));
+    gross = 0.0;
+    pf = 0.0;
+    net = 0.0;
 }
 
-Payroll::Payroll() {}
+Payslip::Payslip(int id, const std::string &name, double grossPay,
+                 double pfAmount, double netPay) {
+    staffId = id;
+    memset(staffName, 0, sizeof(staffName));
+    strncpy(staffName, name.c_str(), sizeof(staffName) - 1);
+    gross = grossPay;
+    pf = pfAmount;
+    net = netPay;
+}
 
-Payslip Payroll::computePayslip(const Staff &s) const {
-    double gross = s.calculatePay();
-    double pf = gross * PF_RATE;
-    double tax = 0.0;
-    if (gross > TAX_SLAB_2) {
-        tax = gross * TAX_RATE_HIGH;
-    } else if (gross > TAX_SLAB_1) {
-        tax = gross * TAX_RATE_LOW;
-    }
-    double net = gross - pf - tax;
-    return Payslip(s.getId(), s.getName(), gross, pf, tax, net);
+int Payslip::getStaffId() const {
+    return staffId;
+}
+
+std::string Payslip::getStaffName() const {
+    return staffName;
+}
+
+double Payslip::getGross() const {
+    return gross;
+}
+
+double Payslip::getPf() const {
+    return pf;
+}
+
+double Payslip::getNet() const {
+    return net;
+}
+
+std::ostream& operator<<(std::ostream &output, const Payslip &slip) {
+    output << "\n===== PAYSLIP =====\n";
+    output << "Staff ID: " << slip.staffId
+           << " | Name: " << slip.staffName << "\n";
+    output << "Gross Pay:  Rs." << slip.gross << "\n";
+    output << "PF (12%):   -Rs." << slip.pf << "\n";
+    output << "-------------------\n";
+    output << "NET PAY:    Rs." << slip.net << "\n";
+    output << "===================\n";
+
+    return output;
+}
+
+Payroll::Payroll() : store("data/payslips.dat") {
+    history = store.readAll();
+}
+
+Payslip Payroll::computePayslip(const Staff &staffMember) const {
+    double grossPay = staffMember.calculateSalary();
+    double pfAmount = grossPay * PF_RATE;
+    double netPay = grossPay - pfAmount;
+
+    return Payslip(staffMember.getId(), staffMember.getName(),
+                   grossPay, pfAmount, netPay);
 }
 
 void Payroll::runPayroll(const std::vector<Staff*> &staffList) {
-    history.clear();
-    std::cout << "\n========== PAYROLL RUN ==========\n";
-    double totalGross = 0.0, totalNet = 0.0;
-    for (size_t i = 0; i < staffList.size(); i++) {
-        Staff *s = staffList[i];
-        if (!s) continue;
-        Payslip p = computePayslip(*s);
-        history.push_back(p);
-        std::cout << p;
-        totalGross = totalGross + p.getGross();
-        totalNet = totalNet + p.getNet();
+    cout << "\n========== PAYROLL RUN ==========\n";
+
+    double totalGross = 0.0;
+    double totalNet = 0.0;
+
+    for (int i = 0; i < (int)staffList.size(); i++) {
+        Staff *person = staffList[i];
+        if (person == NULL) {
+            continue;
+        }
+
+        Payslip slip = computePayslip(*person);
+        history.push_back(slip);
+        store.append(slip);
+
+        cout << slip;
+        totalGross = totalGross + slip.getGross();
+        totalNet = totalNet + slip.getNet();
     }
-    std::cout << "---------------------------------\n";
-    std::cout << "Total Gross: Rs." << totalGross << " | Total Net: Rs." << totalNet << "\n";
-    std::cout << "=================================\n";
+
+    cout << "---------------------------------\n";
+    cout << "Total Gross: Rs." << totalGross
+         << " | Total Net: Rs." << totalNet << "\n";
+    cout << "=================================\n";
 }
 
 void Payroll::showHistory() const {
-    std::cout << "\n========== PAYSLIP HISTORY ==========\n";
+    cout << "\n========== PAYSLIP HISTORY ==========\n";
+
     if (history.empty()) {
-        std::cout << "No payslips generated yet.\n";
+        cout << "No payslips generated yet.\n";
     } else {
-        for (size_t i = 0; i < history.size(); i++) {
-            std::cout << history[i];
+        for (int i = 0; i < (int)history.size(); i++) {
+            cout << history[i];
         }
     }
-    std::cout << "====================================\n";
-}
 
-std::ostream& operator<<(std::ostream &os, const Payroll &p) {
-    (void)p;
-    return os;
-}
-
+    cout << "=====================================\n";
 }

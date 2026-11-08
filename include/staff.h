@@ -1,129 +1,97 @@
-#ifndef RMS_STAFF_H
-#define RMS_STAFF_H
+#ifndef STAFF_H
+#define STAFF_H
 
 #include <string>
-#include <vector>
-#include <ostream>
-#include "records.h"
 
-namespace restaurant {
+enum Role {
+    MANAGER = 1,
+    CHEF = 2,
+    WAITER = 3,
+    HEAD_CHEF = 4
+};
 
-// Abstract base class for all staff (pure virtual functions -> run-time polymorphism)
+struct StaffData {
+    int id;
+    char name[32];
+    int role;
+    double baseSalary;
+    int active;
+
+    int getId() const {
+        return id;
+    }
+};
+
 class Staff {
 protected:
     int id;
     std::string name;
     double baseSalary;
-    int daysPresent;
-    double overtimeHours;
+
     static int nextId;
+
 public:
     Staff();
-    Staff(const std::string &n, double base);
-    Staff(const Staff &other);                 // copy constructor
-    Staff& operator=(const Staff &other);      // assignment operator
-    virtual ~Staff();                          // virtual destructor
+    Staff(const std::string &staffName, double salary);
+    virtual ~Staff();
 
-    static int nextIdValue() { return nextId; }
-    static void setNextIdValue(int v) { nextId = v; }
+    static int nextIdValue();
+    static void setNextIdValue(int value);
 
     int getId() const;
-    const std::string& getName() const;
-    double getBaseSalary() const;
-    int getDaysPresent() const;
-    double getOvertimeHours() const;
-    bool isActive() const;
+    std::string getName() const;
+    void setName(const std::string &staffName);
+    void setBaseSalary(double salary);
 
-    void setName(const std::string &n);
-    void setBaseSalary(double b);
-    void setDaysPresent(int d);
-    void setOvertimeHours(double o);
-    void setActive(bool a);
+    virtual double calculateSalary() const = 0;
+    virtual void display() const = 0;
+    virtual Role getRole() const = 0;
 
-    // Pure virtual functions - each role implements its own pay rule and duties
-    virtual double calculatePay() const = 0;
-    virtual std::string duties() const = 0;
-    virtual void print(std::ostream &os) const = 0;
-    virtual int role() const = 0;
-    virtual std::string roleName() const = 0;
-
-    // Conversion to/from fixed-size binary record
-    virtual StaffRecord toRecord() const = 0;
-    virtual void fromRecord(const StaffRecord &r) = 0;
-
-    friend class Payroll;                      // friend class: Payroll can access staff internals
+    StaffData toData() const;
+    void loadFromData(const StaffData &data);
 };
 
 class Chef : virtual public Staff {
-protected:
-    int dishesCooked;
 public:
     Chef();
-    Chef(const std::string &n, double base);
-    virtual ~Chef();
+    Chef(const std::string &staffName, double salary);
 
-    int getDishesCooked() const;
-    void setDishesCooked(int d);
-
-    virtual double calculatePay() const;
-    virtual std::string duties() const;
-    virtual void print(std::ostream &os) const;
-    virtual int role() const;
-    virtual std::string roleName() const;
-    virtual StaffRecord toRecord() const;
-    virtual void fromRecord(const StaffRecord &r);
+    double calculateSalary() const override;
+    void display() const override;
+    Role getRole() const override;
 };
 
 class Waiter : virtual public Staff {
-protected:
-    double tips;
 public:
     Waiter();
-    Waiter(const std::string &n, double base);
-    virtual ~Waiter();
+    Waiter(const std::string &staffName, double salary);
 
-    double getTips() const;
-    void addTips(double t);
-
-    virtual double calculatePay() const;
-    virtual std::string duties() const;
-    virtual void print(std::ostream &os) const;
-    virtual int role() const;
-    virtual std::string roleName() const;
-    virtual StaffRecord toRecord() const;
-    virtual void fromRecord(const StaffRecord &r);
+    double calculateSalary() const override;
+    void display() const override;
+    Role getRole() const override;
 };
 
-class Cashier : virtual public Staff {
+class Manager : virtual public Staff {
+protected:
+    double allowance;
+
 public:
-    Cashier();
-    Cashier(const std::string &n, double base);
-    virtual ~Cashier();
+    Manager();
+    Manager(const std::string &staffName, double salary);
 
-    virtual double calculatePay() const;
-    virtual std::string duties() const;
-    virtual void print(std::ostream &os) const;
-    virtual int role() const;
-    virtual std::string roleName() const;
-    virtual StaffRecord toRecord() const;
-    virtual void fromRecord(const StaffRecord &r);
+    double calculateSalary() const override;
+    void display() const override;
+    Role getRole() const override;
 };
 
-class Cleaner : virtual public Staff {
+class HeadChef : public Chef, public Manager {
 public:
-    Cleaner();
-    Cleaner(const std::string &n, double base);
-    virtual ~Cleaner();
+    HeadChef();
+    HeadChef(const std::string &staffName, double salary);
 
-    virtual double calculatePay() const;
-    virtual std::string duties() const;
-    virtual void print(std::ostream &os) const;
-    virtual int role() const;
-    virtual std::string roleName() const;
-    virtual StaffRecord toRecord() const;
-    virtual void fromRecord(const StaffRecord &r);
+    double calculateSalary() const override;
+    void display() const override;
+    Role getRole() const override;
 };
-
-}
 
 #endif

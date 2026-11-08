@@ -1,53 +1,46 @@
-#ifndef RMS_PAYROLL_H
-#define RMS_PAYROLL_H
+#ifndef PAYROLL_H
+#define PAYROLL_H
 
+#include <ostream>
 #include <string>
 #include <vector>
-#include <ostream>
 #include "staff.h"
-
-namespace restaurant {
+#include "templates.h"
 
 class Payslip {
 private:
     int staffId;
-    std::string staffName;
+    char staffName[32];
     double gross;
     double pf;
-    double tax;
     double net;
+
 public:
     Payslip();
-    Payslip(int id, const std::string &name, double g, double p, double t, double n);
+    Payslip(int id, const std::string &name, double grossPay, double pfAmount, double netPay);
 
     int getStaffId() const;
-    const std::string& getStaffName() const;
+    std::string getStaffName() const;
     double getGross() const;
-    double getPF() const;
-    double getTax() const;
+    double getPf() const;
     double getNet() const;
 
-    friend std::ostream& operator<<(std::ostream &os, const Payslip &p);
+    friend std::ostream& operator<<(std::ostream &output, const Payslip &slip);
 };
 
 class Payroll {
 private:
-    static const double PF_RATE;               // static member: PF percentage
-    static const double TAX_SLAB_1;
-    static const double TAX_SLAB_2;
-    static const double TAX_RATE_LOW;
-    static const double TAX_RATE_HIGH;
-    std::vector<Payslip> history;              // payslips kept in history
+    static const double PF_RATE;
+
+    std::vector<Payslip> history;
+    FileStore<Payslip> store;
+
 public:
     Payroll();
 
-    Payslip computePayslip(const Staff &s) const;
+    Payslip computePayslip(const Staff &staffMember) const;
     void runPayroll(const std::vector<Staff*> &staffList);
     void showHistory() const;
-
-    friend std::ostream& operator<<(std::ostream &os, const Payroll &p);
 };
-
-}
 
 #endif

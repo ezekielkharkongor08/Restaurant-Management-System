@@ -1,15 +1,14 @@
-#ifndef RMS_ORDER_H
-#define RMS_ORDER_H
+#ifndef ORDER_H
+#define ORDER_H
 
-#include <string>
-#include <vector>
 #include <ostream>
+#include <string>
 
-namespace restaurant {
+const int MAX_ITEMS = 20;
 
 struct OrderItem {
     int dishId;
-    std::string name;
+    char name[32];
     double price;
     int qty;
 };
@@ -19,36 +18,63 @@ private:
     int id;
     int tableNo;
     int waiterId;
-    std::vector<OrderItem> items;
-    enum State { Placed, Cooking, Ready, Served, Paid };
-    State state;
-    static int nextOrderId;                    // static member: auto-increasing order id
+    int state;
+    double billTotal;
+    int itemCount;
+    OrderItem items[MAX_ITEMS];
+
+    static int nextId;
+
 public:
+    enum State {
+        PLACED = 0,
+        SERVED = 1,
+        PAID = 2
+    };
+
     Order();
-    Order(int t, int w);
-    ~Order();
+    Order(int table, int waiter);
 
     int getId() const;
-    int getTableNo() const;
     int getWaiterId() const;
-    State getState() const;
-    const std::vector<OrderItem>& getItems() const;
+    int getTableNo() const;
+    int getState() const;
     double subtotal() const;
 
-    // Operator overloading: add an item to an order with +=
-    void operator+=(const OrderItem &item);
+    Order& operator+=(const OrderItem &item);
+
     void advanceState();
-    void markPaid();
+    void markPaid(double total);
 
     bool isPlaced() const;
-    bool isCooking() const;
-    bool isReady() const;
     bool isServed() const;
     bool isPaid() const;
 
-    friend std::ostream& operator<<(std::ostream &os, const Order &o);
+    int getItemCount() const;
+    OrderItem getItem(int index) const;
+
+    static int nextIdValue();
+    static void setNextIdValue(int value);
+
+    friend class Restaurant;
+    friend std::ostream& operator<<(std::ostream &output, const Order &order);
 };
 
-}
+class Bill {
+private:
+    int orderId;
+    int waiterId;
+    double subtotal;
+    double discountPercent;
+    double total;
+
+public:
+    Bill();
+    Bill(int order, int waiter, double subTotal, double discount);
+
+    double getTotal() const;
+
+    friend std::ostream& operator<<(std::ostream &output, const Bill &bill);
+};
 
 #endif
